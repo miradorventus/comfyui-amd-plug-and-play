@@ -1,0 +1,161 @@
+=======================================================
+  MEMO COMMANDES UTILES — ComfyUI
+  AMD GPU — Ubuntu 24.04
+  / USEFUL COMMANDS — ComfyUI
+=======================================================
+
+-------------------------------------------------------
+  DÉMARRAGE / ARRÊT  |  START / STOP
+-------------------------------------------------------
+
+Lancer ComfyUI :
+→ Double-clic sur l'icône ComfyUI sur le bureau
+→ Double-click the ComfyUI icon on the desktop
+
+Arrêter ComfyUI :
+→ Fermer la fenêtre Firefox/Edge/Chrome
+→ Close the Firefox/Edge/Chrome window
+
+Interface web / Web interface:
+  http://localhost:8188
+
+-------------------------------------------------------
+  TÉLÉCHARGER UN MODÈLE  |  DOWNLOAD A MODEL
+-------------------------------------------------------
+
+Utiliser le raccourci bureau "DL Modèle" :
+→ Double-clic → coller l'URL → choisir le dossier
+/ Use the "DL Modèle" desktop shortcut:
+→ Double-click → paste URL → choose folder
+
+Ou en ligne de commande / Or via command line:
+  wget -c "URL_DU_MODELE" \
+    -O ~/comfyui_propre/ComfyUI/models/checkpoints/nom.safetensors
+
+-------------------------------------------------------
+  DOSSIERS DES MODÈLES  |  MODEL FOLDERS
+-------------------------------------------------------
+
+  ~/comfyui_propre/ComfyUI/models/
+
+  checkpoints/      → modèles principaux (SD1.5, SDXL, Flux...)
+                      / main models
+  loras/            → LoRA (styles, personnages / styles, characters)
+  vae/              → VAE (améliore les couleurs / improves colors)
+  controlnet/       → ControlNet (contrôle la pose, contours...)
+                      / controls pose, edges...
+  upscale_models/   → agrandissement d'images / image upscaling
+  embeddings/       → styles textuels / textual styles
+  text_encoders/    → encodeurs de texte (Flux, etc.)
+
+-------------------------------------------------------
+  VRAM — CHOISIR LE BON MODÈLE
+  VRAM — CHOOSING THE RIGHT MODEL
+-------------------------------------------------------
+
+  4  GB VRAM → SD 1.5 (512x512)
+  8  GB VRAM → SDXL (1024x1024)
+  12 GB VRAM → Flux schnell (rapide / fast)
+  16 GB VRAM → Flux dev, SDXL + LoRA
+  24 GB VRAM → Flux dev haute résolution / high resolution
+
+-------------------------------------------------------
+  LIBÉRER LA VRAM  |  FREE VRAM
+-------------------------------------------------------
+
+ComfyUI libère automatiquement la VRAM après 5 minutes
+d'inactivité (watchdog intégré).
+/ ComfyUI automatically frees VRAM after 5 minutes
+of inactivity (built-in watchdog).
+
+Libérer manuellement / Free manually:
+  Ouvrir http://localhost:8188
+  Menu → Manager → Free Memory
+  / Open http://localhost:8188
+  / Menu → Manager → Free Memory
+
+-------------------------------------------------------
+  VÉRIFIER QUE LE GPU TRAVAILLE
+  CHECK THAT GPU IS WORKING
+-------------------------------------------------------
+
+Dans les logs ComfyUI, chercher / In ComfyUI logs, look for:
+  grep "ROCm\|AMD\|gfx" ~/comfyui.log
+
+Au démarrage, doit afficher / At startup, should show:
+  pytorch version: X.X.X+rocm7.2   ✅
+  AMD arch: gfx1201                 ✅
+  Device: cuda:0 AMD Radeon         ✅
+
+-------------------------------------------------------
+  MISE À JOUR COMFYUI  |  UPDATE COMFYUI
+-------------------------------------------------------
+
+  cd ~/comfyui_propre/ComfyUI
+  source ~/comfyui_propre/venv/bin/activate
+  git pull
+  pip install -r requirements.txt
+  deactivate
+
+-------------------------------------------------------
+  MISE À JOUR PYTORCH ROCM
+  UPDATE PYTORCH ROCM
+-------------------------------------------------------
+
+  source ~/comfyui_propre/venv/bin/activate
+  pip install torch torchvision torchaudio \
+    --index-url https://download.pytorch.org/whl/rocm7.2 \
+    --upgrade
+  deactivate
+
+-------------------------------------------------------
+  INSTALLER UN CUSTOM NODE  |  INSTALL CUSTOM NODE
+-------------------------------------------------------
+
+  cd ~/comfyui_propre/ComfyUI/custom_nodes/
+  git clone URL_DU_NODE
+  source ~/comfyui_propre/venv/bin/activate
+  cd NOM_DU_NODE && pip install -r requirements.txt
+  deactivate
+  # Redémarrer ComfyUI / Restart ComfyUI
+
+-------------------------------------------------------
+  PROBLÈMES COURANTS  |  COMMON ISSUES
+-------------------------------------------------------
+
+ComfyUI ne démarre pas / ComfyUI won't start:
+  cat ~/comfyui.log | tail -30
+
+GPU non détecté / GPU not detected:
+  grep "library=cpu" ~/comfyui.log
+  → Si présent, ROCm non chargé / If present, ROCm not loaded
+  → Vérifier : ls /dev/kfd / Check: ls /dev/kfd
+
+Erreur mémoire / Memory error:
+  → Utiliser un modèle plus petit / Use a smaller model
+  → Réduire la résolution / Reduce resolution
+  → Fermer les autres apps GPU / Close other GPU apps
+
+Message "libcuda.so.1 not found" :
+  → Normal sur AMD, ignorer / Normal on AMD, ignore it ✅
+
+Note GPU RDNA4 (RX 9070 / 9070 XT) :
+  HSA_OVERRIDE_GFX_VERSION=12.0.1 est déjà configuré ✅
+  / HSA_OVERRIDE_GFX_VERSION=12.0.1 is already configured ✅
+
+-------------------------------------------------------
+  SITES UTILES  |  USEFUL WEBSITES
+-------------------------------------------------------
+
+Modèles / Models:
+  https://civitai.com
+  https://huggingface.co
+
+Workflows:
+  https://openart.ai/workflows
+  https://comfyworkflows.com
+
+Custom Nodes:
+  https://registry.comfy.org
+
+=======================================================
