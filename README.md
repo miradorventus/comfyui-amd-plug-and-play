@@ -2,6 +2,15 @@
 
 # 🎨 ComfyUI — AMD Plug & Play
 
+## 🎉 What's new — v1.1.2
+
+- 🔄 **Update check BEFORE launch** — new version notification appears immediately with auto-restart
+- 👥 **Already-running detection** — clicking ComfyUI while running shows "New tab" or "Reset services" with confirmation
+- ⚡ **Startup loading window** — visual feedback during model loading (can take 30-60s)
+- 🌐 **Fixed DNS timeout** — now uses `127.0.0.1` instead of `localhost` for instant connection
+- 🔒 **No sudo required** — ComfyUI runs entirely in user space
+
+
 > **No terminal gymnastics. No dependency hell. Just vibes and working AI.**
 
 You want to generate images on your AMD GPU. You don't want to spend the afternoon debugging PyTorch ROCm wheels, virtual environments, or why `libcuda.so.1` is missing on a card that doesn't even use CUDA.
