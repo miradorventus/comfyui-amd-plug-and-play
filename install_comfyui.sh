@@ -197,7 +197,7 @@ Type=Application
 Name=DL Model
 Comment=Download a ComfyUI model
 Exec=$HOME/telecharger_modele.sh
-Icon=emblem-downloads
+Icon=$SCRIPT_DIR/icon_dlmodel.png
 Terminal=false
 Categories=Application;
 DESK
