@@ -1,28 +1,35 @@
 #!/bin/bash
-# Watchdog ComfyUI - décharge les modèles si aucun client connecté
-IDLE_TIMEOUT=300  # secondes avant déchargement
-last_connected=$(date +%s)
-was_connected=false
+# ============================================================
+#  watchdog_comfy.sh — Free VRAM after 5 min idle
+# ============================================================
+
+LAST_ACTIVITY=$(date +%s)
+TIMEOUT=300  # 5 minutes
 
 while true; do
-  # Vérifie si un navigateur est connecté sur 8188
-  connections=$(ss -tn | grep ':8188' | grep ESTAB | wc -l)
-
-  if [ "$connections" -gt 0 ]; then
-    last_connected=$(date +%s)
-    was_connected=true
-  else
-    if [ "$was_connected" = true ]; then
-      now=$(date +%s)
-      idle=$((now - last_connected))
-      if [ "$idle" -ge "$IDLE_TIMEOUT" ]; then
-        echo "$(date) - Aucun client depuis ${idle}s, déchargement des modèles..."
-        curl -s -X POST http://localhost:8188/free \
-          -H "Content-Type: application/json" \
-          -d '{"unload_models": true, "free_memory": true}' > /dev/null
-        was_connected=false
-      fi
-    fi
+  sleep 30
+  
+  if ! pgrep -f "python main.py" > /dev/null; then
+    echo "ComfyUI not running, watchdog exit"
+    exit 0
   fi
-  sleep 10
+
+  STATS=$(curl -s http://localhost:8188/queue 2>/dev/null)
+  PENDING=$(echo "$STATS" | grep -o '"queue_running":\[[^]]*\]' | grep -c 'PromptQueue')
+
+  if [ "$PENDING" -gt 0 ] 2>/dev/null; then
+    LAST_ACTIVITY=$(date +%s)
+    continue
+  fi
+
+  NOW=$(date +%s)
+  IDLE=$((NOW - LAST_ACTIVITY))
+
+  if [ $IDLE -gt $TIMEOUT ]; then
+    echo "Idle for $IDLE seconds, freeing VRAM..."
+    curl -s -X POST http://localhost:8188/free \
+      -H "Content-Type: application/json" \
+      -d '{"unload_models":true,"free_memory":true}' > /dev/null
+    LAST_ACTIVITY=$(date +%s)
+  fi
 done

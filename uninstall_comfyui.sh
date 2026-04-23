@@ -1,109 +1,85 @@
 #!/bin/bash
+# ============================================================
+#  uninstall_comfyui.sh
+#  Standard layout: ~/ComfyUI and ~/.venvs/comfyui
+# ============================================================
 
-# --- Zenity disponible ? ---
+LOG_FILE="$HOME/uninstall_comfyui.log"
+STATUS_FILE=$(mktemp)
+
+COMFY_DIR="$HOME/ComfyUI"
+VENV_DIR="$HOME/.venvs/comfyui"
+
 if ! command -v zenity &>/dev/null; then
   sudo apt install zenity -y
 fi
 
-# --- Authentification sudo ---
-if ! sudo -n true 2>/dev/null; then
-  PASSWORD=$(zenity --password \
-    --title="Authentification requise" \
-    --text="Entrez votre mot de passe administrateur :" \
-    --width=400 2>/dev/null)
-  [ $? -ne 0 ] && exit 0
-  echo "$PASSWORD" | sudo -S -v 2>/dev/null || {
-    zenity --error --title="Erreur" --text="❌ Mot de passe incorrect." --width=300 2>/dev/null
-    exit 1
-  }
-fi
+MSG="⚠️ Uninstall ComfyUI?\n\nThis will remove:\n• $COMFY_DIR (git repo)\n• $VENV_DIR (Python environment)\n• Scripts and desktop shortcuts\n\n⚠️ Your models in ~/ComfyUI/models/ will be deleted!"
 
-LANG_SYS=$(echo $LANG | cut -d_ -f1)
-if [ "$LANG_SYS" = "fr" ]; then
-  MSG="⚠️ Voulez-vous désinstaller ComfyUI ?\n\nCeci supprimera :\n• Le dossier ~/comfyui_propre\n• Les scripts et raccourcis\n\n⚠️ Vos modèles dans ~/comfyui_propre/ComfyUI/models/ seront supprimés !"
-  MSG_KEEP="Conserver les modèles"
-  MSG_DELETE="Tout supprimer"
-  MSG_OK="✅ ComfyUI désinstallé !"
-  MSG_MODELS="Vos modèles ont été conservés dans ~/comfyui_models_backup"
-  MSG_CANCEL="Désinstallation annulée."
-  MSG_INTERRUPTED="⚠️ Désinstallation interrompue."
-else
-  MSG="⚠️ Do you want to uninstall ComfyUI?\n\nThis will remove:\n• The ~/comfyui_propre folder\n• Scripts and shortcuts\n\n⚠️ Your models in ~/comfyui_propre/ComfyUI/models/ will be deleted!"
-  MSG_KEEP="Keep models"
-  MSG_DELETE="Delete everything"
-  MSG_OK="✅ ComfyUI uninstalled!"
-  MSG_MODELS="Your models have been saved to ~/comfyui_models_backup"
-  MSG_CANCEL="Uninstallation cancelled."
-  MSG_INTERRUPTED="⚠️ Uninstallation interrupted."
-fi
+zenity --question --title="Uninstall ComfyUI" --text="$MSG" --width=450 2>/dev/null
+[ $? -ne 0 ] && exit 0
 
-# Confirmation
-zenity --question \
-  --title="AMD AI Setup — Désinstallation ComfyUI" \
-  --text="$MSG" --width=450 2>/dev/null
-[ $? -ne 0 ] && echo "$MSG_CANCEL" && exit 0
-
-# Sauvegarder les modèles ?
 KEEP_MODELS=false
-zenity --question \
-  --title="Modèles ComfyUI" \
-  --text="Voulez-vous sauvegarder vos modèles avant la désinstallation ?" \
-  --ok-label="$MSG_KEEP" \
-  --cancel-label="$MSG_DELETE" \
+zenity --question --title="Models backup" \
+  --text="Do you want to save your models before uninstalling?" \
+  --ok-label="Keep models" --cancel-label="Delete everything" \
   --width=400 2>/dev/null
 [ $? -eq 0 ] && KEEP_MODELS=true
 
-# --- Pipe pour logs en temps réel ---
-PIPE=$(mktemp -u)
-mkfifo "$PIPE"
+echo "=== Uninstall log — $(date) ===" > "$LOG_FILE"
+log() { echo "[$(date '+%H:%M:%S')] $1" >> "$LOG_FILE"; }
 
-zenity --text-info \
-  --title="ComfyUI — Désinstallation en cours..." \
-  --filename="$PIPE" \
-  --width=600 --height=300 \
-  --no-wrap 2>/dev/null &
-ZENITY_LOG_PID=$!
+uninstall() {
+  log "=== Stopping ComfyUI ==="
+  pkill -f "python main.py" 2>/dev/null
+  pkill -f "watchdog_comfy" 2>/dev/null
+  sleep 2
 
-exec 3>"$PIPE"
+  if [ "$KEEP_MODELS" = true ] && [ -d "$COMFY_DIR/models" ]; then
+    log "Saving models to ~/comfyui_models_backup..."
+    cp -r "$COMFY_DIR/models" "$HOME/comfyui_models_backup"
+    log "Models saved ✅"
+  fi
 
-log() {
-  echo "[$(date '+%Y-%m-%d %H:%M:%S')] $1" >&3
+  log "Removing $COMFY_DIR..."
+  rm -rf "$COMFY_DIR"
+
+  log "Removing $VENV_DIR..."
+  rm -rf "$VENV_DIR"
+
+  log "Removing scripts..."
+  rm -f ~/comfyui.sh ~/stopcomfy.sh ~/watchdog_comfy.sh ~/telecharger_modele.sh
+
+  log "Removing desktop shortcuts..."
+  rm -f ~/Bureau/ComfyUI.desktop ~/Desktop/ComfyUI.desktop
+  rm -f ~/Bureau/DL-Model.desktop ~/Desktop/DL-Model.desktop
+  rm -f ~/Bureau/DL-Modele.desktop ~/Desktop/DL-Modele.desktop
+
+  log "✅ Uninstall complete!"
+  echo "SUCCESS" > "$STATUS_FILE"
 }
 
-log "=== Démarrage désinstallation ComfyUI ==="
+uninstall &
+PID=$!
 
-log "Arrêt de ComfyUI..."
-pkill -f "python main.py" 2>/dev/null
-pkill -f "watchdog_comfy" 2>/dev/null
-sleep 2
+tail -n 15 -f "$LOG_FILE" 2>/dev/null | zenity --text-info \
+  --title="ComfyUI — Uninstalling..." \
+  --width=600 --height=300 \
+  --no-wrap --ok-label="Close" 2>/dev/null &
+ZENITY_PID=$!
 
-if [ "$KEEP_MODELS" = true ]; then
-  log "Sauvegarde des modèles dans ~/comfyui_models_backup..."
-  cp -r ~/comfyui_propre/ComfyUI/models ~/comfyui_models_backup 2>/dev/null
-  log "Modèles sauvegardés ✅"
+while kill -0 $PID 2>/dev/null; do sleep 1; done
+kill $ZENITY_PID 2>/dev/null
+
+STATUS=$(cat "$STATUS_FILE" 2>/dev/null)
+rm -f "$STATUS_FILE"
+
+if [ "$STATUS" = "SUCCESS" ]; then
+  MSG_FINAL="✅ ComfyUI has been uninstalled."
+  [ "$KEEP_MODELS" = true ] && MSG_FINAL="$MSG_FINAL\n\nYour models are saved in ~/comfyui_models_backup"
+  zenity --info --title="Uninstall complete" --text="$MSG_FINAL" --width=400 2>/dev/null
+else
+  zenity --warning --title="Uninstall" --text="⚠️ Uninstall was interrupted." --width=350 2>/dev/null
 fi
-
-log "Suppression de ~/comfyui_propre..."
-rm -rf ~/comfyui_propre
-log "Dossier supprimé ✅"
-
-log "Suppression des scripts..."
-rm -f ~/telecharger_modele.sh
-log "Scripts supprimés ✅"
-
-log "Suppression des raccourcis bureau..."
-rm -f ~/Bureau/ComfyUI.desktop ~/Desktop/ComfyUI.desktop
-rm -f ~/Bureau/DL-Modele.desktop ~/Desktop/DL-Modele.desktop
-log "Raccourcis supprimés ✅"
-
-log "✅ Désinstallation terminée !"
-
-exec 3>&-
-wait $ZENITY_LOG_PID 2>/dev/null
-rm -f "$PIPE"
-
-MSG_FINAL="$MSG_OK"
-[ "$KEEP_MODELS" = true ] && MSG_FINAL="$MSG_OK\n\n$MSG_MODELS"
-zenity --info --title="AMD AI Setup" --text="$MSG_FINAL" --width=400 2>/dev/null
 
 exit 0
