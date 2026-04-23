@@ -183,7 +183,7 @@ Type=Application
 Name=ComfyUI
 Comment=Launch ComfyUI
 Exec=$HOME/comfyui.sh
-Icon=utilities-terminal
+Icon=$SCRIPT_DIR/icon.png
 Terminal=false
 Categories=Application;
 DESK
