@@ -198,7 +198,7 @@ Name=DL Model
 Comment=Download a ComfyUI model
 Exec=$HOME/telecharger_modele.sh
 Icon=emblem-downloads
-Terminal=true
+Terminal=false
 Categories=Application;
 DESK
   gio set "$DESKTOP/DL-Model.desktop" metadata::trusted true 2>/dev/null
