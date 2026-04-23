@@ -1,20 +1,22 @@
 # 🎨 ComfyUI — AMD Plug & Play
 
-> **One click. That's it.**
+> **No terminal gymnastics. No dependency hell. Just vibes and working AI.**
 
-A dead-simple installer for **ComfyUI** on Ubuntu with AMD GPU acceleration.
-No terminal wizardry needed — just double-click and go.
+You want to generate images on your AMD GPU. You don't want to spend the afternoon debugging PyTorch ROCm wheels, virtual environments, or why `libcuda.so.1` is missing on a card that doesn't even use CUDA.
+
+**One command. One click. ComfyUI running on your AMD GPU.**
 
 ---
 
 ## ✨ What you get
 
-- 🖥️ **Desktop shortcut** to launch everything with one click
-- 🎨 **ComfyUI** — powerful node-based AI image generation on your AMD GPU
-- 📥 **Model downloader** — desktop shortcut to download models easily
-- ⚡ **Auto stop** — closes everything when you close the browser
-- 💾 **VRAM watchdog** — models unload automatically after 5 minutes idle
-- 🔒 **100% local** — your images stay on your machine
+- 🖥️ **Desktop shortcut** — click it, ComfyUI opens, you generate
+- 🎨 **ComfyUI** — node-based image generation, installed clean from the official repo
+- 📥 **Model downloader** — paste URL, pick folder from **22 options**, download. Filename stays original (templates rely on that)
+- ⚡ **Smart on-demand** — closes when you close the browser
+- 💾 **VRAM watchdog** — auto-frees memory after 5 minutes idle
+- 📂 **Standard layout** — `~/ComfyUI/` (git repo) and `~/.venvs/comfyui/` (venv). Easy to update with `git pull`
+- 🔒 **100% local** — your generations stay on your machine
 
 ---
 
@@ -25,16 +27,16 @@ No terminal wizardry needed — just double-click and go.
 | OS | Ubuntu 24.04 LTS |
 | GPU | AMD with ROCm support (RX 6000 series and newer) |
 | RAM | 16 GB minimum |
-| Storage | 25 GB free minimum (PyTorch ROCm is large) |
-| Internet | Required for installation only |
+| Storage | 25 GB free (PyTorch ROCm is chunky, I know) |
+| Internet | For the initial setup only |
 
-> ⚠️ **RDNA4 users (RX 9070 / 9070 XT):** `HSA_OVERRIDE_GFX_VERSION=12.0.1` is already pre-configured.
+> ⚠️ **RDNA4 gang (RX 9070 / 9070 XT):** `HSA_OVERRIDE_GFX_VERSION=12.0.1` is already wired up. You're welcome.
 
 ---
 
 ## 📦 Installation
 
-**Copy this 👇 — Paste into a terminal — Press Enter — Enjoy! 🎉**
+**Copy this 👇 — Paste into terminal — Go make dinner 🍝**
 
 ```bash
 git clone https://github.com/miradorventus/comfyui-amd-plug-and-play.git
@@ -43,17 +45,17 @@ chmod +x install_comfyui.sh
 ./install_comfyui.sh
 ```
 
-The graphical installer will handle everything:
+The installer does the work:
 
-1. ✅ Ask for your password once (via a popup — no terminal needed after this)
-2. ✅ Check Python, Git and your AMD GPU
-3. ✅ Clone ComfyUI from GitHub
-4. ✅ Install PyTorch with ROCm acceleration
-5. ✅ Create desktop shortcuts **ComfyUI** and **DL Model**
-6. ✅ Launch ComfyUI automatically when done
+1. ✅ Asks for your password once (popup, not terminal)
+2. ✅ Detects what's missing (Python, Git, ROCm) and offers to install it
+3. ✅ Clones ComfyUI to `~/ComfyUI` (standard location — `git pull` works)
+4. ✅ Creates a separate venv in `~/.venvs/comfyui` (keeps things clean)
+5. ✅ Installs PyTorch with ROCm acceleration
+6. ✅ Creates **ComfyUI** and **DL Model** desktop shortcuts
 
-> ⏳ Installation takes **10-20 minutes** — PyTorch ROCm is about 6 GB.
-> A live log window shows you exactly what's happening. Don't worry if it seems slow — it's normal!
+> ⏳ Installation takes **10-20 minutes** — PyTorch ROCm is ~6 GB.
+> Live log window shows every step. Make a sandwich.
 
 ---
 
@@ -61,7 +63,9 @@ The graphical installer will handle everything:
 
 **Start:** Double-click **ComfyUI** on your desktop
 
-**Stop:** Close the browser window — everything stops automatically
+**Stop:** Close the browser — ComfyUI shuts down automatically
+
+**Download a model:** Double-click **DL Model** — it's GUI-first
 
 **Web interface:** `http://localhost:8188`
 
@@ -69,108 +73,98 @@ The graphical installer will handle everything:
 
 ## 🗑️ Uninstall
 
-**Copy this 👇 — Paste into a terminal — Done!**
+**Copy this 👇 — Paste — Done.**
 
 ```bash
 cd comfyui-amd-plug-and-play
 ./uninstall_comfyui.sh
 ```
 
-- Asks if you want to **save your models** before uninstalling
-- Removes ComfyUI and its virtual environment
-- Removes scripts and desktop shortcuts
+Asks if you want to **keep your models** (backed up to `~/comfyui_models_backup`).
+Because losing a 30 GB model collection would suck.
 
 ---
 
 ## 📥 Download a Model
 
-### Option 1 — Desktop shortcut (easiest)
+### Option 1 — Desktop shortcut (the easy way)
 
-Double-click **DL Model** on your desktop → paste the model URL → choose the folder → done!
+Double-click **DL Model** → paste URL → pick folder → download.
+No terminal, no rename prompts. Your templates will find the file exactly where they expect.
 
-**Example URL from HuggingFace:**
+**Supported folders** (yes, all 22 of them):
+
+checkpoints, loras, vae, controlnet, upscale_models, embeddings, text_encoders, clip, clip_vision, diffusion_models, diffusers, unet, audio_encoders, frame_interpolation, gligen, hypernetworks, latent_upscale_models, model_patches, photomaker, style_models, configs, vae_approx
+
+**Example URLs:**
+
 ```
+# SDXL base
 https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
+
+# SD 1.5 classic
+https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors
+
+# Civitai — copy any model's direct download link
 ```
 
-**Example URL from Civitai:**
-```
-# Go to civitai.com → find a model → click Download → copy the link → paste it into DL Model
-```
-
-### Option 2 — Command line
+### Option 2 — Command line (the old way)
 
 ```bash
-# Download SD 1.5 (classic, lightweight — 2 GB)
-wget -c "https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors" \
-  -O ~/comfyui_propre/ComfyUI/models/checkpoints/v1-5-pruned-emaonly.safetensors
+# SD 1.5 (2 GB, 512×512 images)
+wget -c "URL" -O ~/ComfyUI/models/checkpoints/v1-5-pruned-emaonly.safetensors
 
-# Download SDXL base (HD images — 7 GB)
-wget -c "https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors" \
-  -O ~/comfyui_propre/ComfyUI/models/checkpoints/sd_xl_base_1.0.safetensors
+# SDXL base (7 GB, 1024×1024 images)
+wget -c "URL" -O ~/ComfyUI/models/checkpoints/sd_xl_base_1.0.safetensors
 
-# Download a LoRA (style add-on — usually 50-200 MB)
-wget -c "YOUR_LORA_URL" \
-  -O ~/comfyui_propre/ComfyUI/models/loras/my_lora.safetensors
+# A LoRA (50-200 MB, styles/characters)
+wget -c "URL" -O ~/ComfyUI/models/loras/my_lora.safetensors
 ```
-
-### Model Folders
-
-| Folder | What goes there | Example |
-|---|---|---|
-| `checkpoints/` | Main models | SD 1.5, SDXL, Flux |
-| `loras/` | Style add-ons | character LoRA, art style |
-| `vae/` | Color improvement | sdxl_vae.safetensors |
-| `controlnet/` | Pose/edge control | control_canny.safetensors |
-| `upscale_models/` | Image upscaling | RealESRGAN_x4.pth |
-| `embeddings/` | Textual styles | bad_hands.pt |
-| `text_encoders/` | For Flux models | clip_l.safetensors |
 
 ### VRAM Guide
 
-| Your VRAM | Recommended models |
+| Your VRAM | Recommended setup |
 |---|---|
-| 4 GB | SD 1.5 at 512×512 |
-| 8 GB | SDXL at 1024×1024 |
-| 12 GB | Flux schnell (fast generations) |
-| 16 GB | Flux dev (best quality) |
-| 24 GB+ | Any model, high resolution |
+| 4 GB | SD 1.5 @ 512×512 |
+| 8 GB | SDXL @ 1024×1024 |
+| 12 GB | Flux schnell (fast gens) |
+| 16 GB | Flux dev (quality gens) |
+| 24 GB+ | Flux dev + ControlNet + LoRAs, have fun |
 
-> 💡 Out of memory? Try reducing the image resolution in your workflow, or switch to a smaller model.
+> 💡 Out of memory? Lower the resolution, use a smaller model, or unload other GPU apps. The watchdog helps too — it auto-frees memory after 5 min idle.
 
 ---
 
 ## 🔧 Useful Commands
 
-**Update ComfyUI:**
+**Update ComfyUI (one of the perks of standard layout):**
 ```bash
-cd ~/comfyui_propre/ComfyUI
-source ~/comfyui_propre/venv/bin/activate
+cd ~/ComfyUI
+source ~/.venvs/comfyui/bin/activate
 git pull
 pip install -r requirements.txt
 deactivate
 ```
 
-**Install a custom node:**
+**Install a custom node (example: ComfyUI Manager):**
 ```bash
-# Example: installing ComfyUI Manager
-cd ~/comfyui_propre/ComfyUI/custom_nodes/
+cd ~/ComfyUI/custom_nodes
 git clone https://github.com/ltdrdata/ComfyUI-Manager.git
-source ~/comfyui_propre/venv/bin/activate
+source ~/.venvs/comfyui/bin/activate
 cd ComfyUI-Manager && pip install -r requirements.txt
 deactivate
-# Then restart ComfyUI
+# Restart ComfyUI to load it
 ```
 
-**Check GPU is working:**
+**Check GPU is actually being used:**
 ```bash
 grep "ROCm\|AMD\|gfx" ~/comfyui.log
-# Should show: pytorch version: X.X.X+rocm7.2 ✅
+# You want to see: pytorch version: X.X.X+rocm7.2
 ```
 
-**View error logs:**
+**View logs when something breaks:**
 ```bash
-cat ~/comfyui.log | tail -30
+tail -30 ~/comfyui.log
 ```
 
 See **MEMO.txt** for the full command reference.
@@ -179,24 +173,21 @@ See **MEMO.txt** for the full command reference.
 
 ## 🌐 Where to find models
 
-- 🌐 **Civitai** — https://civitai.com (SD 1.5, SDXL, LoRA, checkpoints)
-- 🤗 **HuggingFace** — https://huggingface.co (Flux, SDXL, SD 1.5, everything)
-- 📋 **OpenArt Workflows** — https://openart.ai/workflows (ready-to-use workflows)
+- 🌐 **Civitai** — https://civitai.com (SD 1.5, SDXL, LoRA, everything)
+- 🤗 **HuggingFace** — https://huggingface.co (Flux, SDXL, raw models)
+- 📋 **OpenArt Workflows** — https://openart.ai/workflows (ready-made workflows)
 
 ---
 
 ## 💬 Contributing
 
-All feedback is welcome — bugs, suggestions, improvements, anything!
+Bug? Feature idea? Tip for other users? **Pull requests and issues welcome.**
+This isn't a one-person gate-keeping project — it's for the AMD Linux community.
 
-→ Open an **Issue**
-→ Submit a **Pull Request**
-→ Share your experience
-
-This project is made by a fellow AMD Linux user, for AMD Linux users. 🤝
+Made by a fellow AMD Linux user who got tired of the setup dance. 🤝
 
 ---
 
 ## 📄 License
 
-MIT — Free to use, modify and share.
+MIT — use it, fork it, break it, make it better.
