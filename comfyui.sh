@@ -1,10 +1,10 @@
 #!/bin/bash
 # ============================================================
 #  comfyui.sh — Launcher ComfyUI (on-demand)
-#  Version: 1.1.2
+#  Version: 1.1.3
 # ============================================================
 
-VERSION="1.1.2"
+VERSION="1.1.3"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 RAW_URL="https://raw.githubusercontent.com/miradorventus/comfyui-amd-plug-and-play/main"
 
@@ -85,7 +85,7 @@ if pgrep -f "python main.py" > /dev/null; then
     --ok-label="New tab" --cancel-label="Reset services" \
     --width=450 2>/dev/null
   if [ $? -eq 0 ]; then
-    BROWSER=$(/home/ia/detect_browser.sh | cut -d"|" -f1)
+    BROWSER=$($HOME/detect_browser.sh | cut -d"|" -f1)
     case "$BROWSER" in
       firefox)
         PROFILE_DIR="$HOME/snap/firefox/common/.mozilla/firefox/comfyui-profile"
@@ -120,7 +120,7 @@ if pgrep -f "python main.py" > /dev/null; then
         sleep 1
       done
       echo "# Stopping ComfyUI..."
-      /home/ia/stopcomfy.sh
+      $HOME/stopcomfy.sh
       echo "# Restarting..."
       sleep 1
     ) | zenity --progress \
@@ -179,7 +179,7 @@ fi
 # ============================================================
 # STEP 5 — Open browser
 # ============================================================
-BROWSER=$(/home/ia/detect_browser.sh | cut -d'|' -f1)
+BROWSER=$($HOME/detect_browser.sh | cut -d'|' -f1)
 
 case "$BROWSER" in
   firefox)
@@ -208,4 +208,4 @@ case "$BROWSER" in
 esac
 
 # Cleanup on exit
-/home/ia/stopcomfy.sh
+$HOME/stopcomfy.sh
