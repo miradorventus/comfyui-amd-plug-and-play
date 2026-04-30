@@ -9,7 +9,7 @@
 #    ~/.comfyui/       (our scripts + log)
 # ============================================================
 
-VERSION="2.0.0"
+VERSION="2.0.1"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 DEFAULT_COMFYUI_DIR="$HOME/.comfyui"
 COMFYUI_DIR="$DEFAULT_COMFYUI_DIR"
@@ -321,6 +321,18 @@ install_scripts() {
 
   [ -f "$DESKTOP/ComfyUI.desktop" ] && cp "$DESKTOP/ComfyUI.desktop" "$DESKTOP/ComfyUI.desktop.bak"
 
+  # Copy icons to install dir so .desktop files survive if user deletes the git repo
+  ICON_COMFY="utilities-terminal"
+  ICON_DLMODEL="utilities-terminal"
+  if [ -f "$SCRIPT_DIR/icon.png" ]; then
+    cp "$SCRIPT_DIR/icon.png" "$COMFYUI_DIR/icon.png" 2>/dev/null
+    ICON_COMFY="$COMFYUI_DIR/icon.png"
+  fi
+  if [ -f "$SCRIPT_DIR/icon_dlmodel.png" ]; then
+    cp "$SCRIPT_DIR/icon_dlmodel.png" "$COMFYUI_DIR/icon_dlmodel.png" 2>/dev/null
+    ICON_DLMODEL="$COMFYUI_DIR/icon_dlmodel.png"
+  fi
+
   cat > "$DESKTOP/ComfyUI.desktop" << DESK
 [Desktop Entry]
 Version=1.0
@@ -328,7 +340,7 @@ Type=Application
 Name=ComfyUI
 Comment=Launch ComfyUI
 Exec=$COMFYUI_DIR/comfyui-launcher.sh
-Icon=$SCRIPT_DIR/icon.png
+Icon=$ICON_COMFY
 Terminal=false
 Categories=Application;
 DESK
@@ -342,7 +354,7 @@ Type=Application
 Name=EZMoDL
 Comment=Download a ComfyUI model
 Exec=$COMFYUI_DIR/ezmodl.sh
-Icon=$SCRIPT_DIR/icon_dlmodel.png
+Icon=$ICON_DLMODEL
 Terminal=false
 Categories=Application;
 DESK

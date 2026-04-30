@@ -4,7 +4,7 @@
 #  Version: 1.0.0
 # ============================================================
 
-VERSION="2.0.0"
+VERSION="2.0.1"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 RAW_URL="https://raw.githubusercontent.com/miradorventus/comfyui-amd-plug-and-play/main"
 
@@ -230,7 +230,8 @@ case "$BROWSER" in
     # WebApp Manager pattern: isolated profile in standard location
     PROFILE_DIR="$HOME/.local/share/ice/firefox/ComfyUI"
     mkdir -p "$PROFILE_DIR"
-    ICON_PATH="$HOME/comfyui-amd-plug-and-play/icon.png"
+    # Use icon from install dir (persists if user deletes the git repo)
+    ICON_PATH="$COMFYUI_DIR/icon.png"
     [ ! -f "$ICON_PATH" ] && ICON_PATH=""
     XAPP_FORCE_GTKWINDOW_ICON="$ICON_PATH" firefox \
       --class WebApp-ComfyUI \
