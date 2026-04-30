@@ -9,6 +9,7 @@ STATUS_FILE=$(mktemp)
 
 COMFY_DIR="$HOME/ComfyUI"
 VENV_DIR="$HOME/.venvs/comfyui"
+COMFYUI_DIR="$HOME/.comfyui"
 
 if ! command -v zenity &>/dev/null; then
   sudo apt install zenity -y
@@ -48,10 +49,12 @@ uninstall() {
   rm -rf "$VENV_DIR"
 
   log "Removing scripts..."
-  rm -f ~/comfyui.sh ~/stopcomfy.sh ~/watchdog_comfy.sh ~/telecharger_modele.sh
+  rm -rf "$COMFYUI_DIR"
+  rm -f ~/comfyui.sh ~/stopcomfy.sh ~/watchdog_comfy.sh ~/telecharger_modele.sh ~/ezmodl.sh
 
   log "Removing desktop shortcuts..."
   rm -f ~/Bureau/ComfyUI.desktop ~/Desktop/ComfyUI.desktop
+  rm -f ~/Bureau/EZMoDL.desktop ~/Desktop/EZMoDL.desktop
   rm -f ~/Bureau/DL-Model.desktop ~/Desktop/DL-Model.desktop
   rm -f ~/Bureau/DL-Modele.desktop ~/Desktop/DL-Modele.desktop
 

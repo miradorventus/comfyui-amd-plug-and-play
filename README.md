@@ -1,33 +1,41 @@
-<p align="center"><img src="icon.png" width="200"/></p>
-
 # 🎨 ComfyUI — AMD Plug & Play
 
-## 🎉 What's new — v1.1.2
+> **No terminal gymnastics. No dependency hell. Just vibes and Stable Diffusion on AMD.**
 
-- 🔄 **Update check BEFORE launch** — new version notification appears immediately with auto-restart
-- 👥 **Already-running detection** — clicking ComfyUI while running shows "New tab" or "Reset services" with confirmation
-- ⚡ **Startup loading window** — visual feedback during model loading (can take 30-60s)
-- 🌐 **Fixed DNS timeout** — now uses `127.0.0.1` instead of `localhost` for instant connection
-- 🔒 **No sudo required** — ComfyUI runs entirely in user space
+Tired of spending your Saturday wrestling with PyTorch wheels, ROCm versions, venv juggling and 47 Stack Overflow tabs about "RuntimeError: CUDA error" on a machine that has no CUDA?
+Yeah, same. That's why this exists.
 
+**One click. Coffee-break install. ComfyUI working on your AMD GPU.**
 
-> **No terminal gymnastics. No dependency hell. Just vibes and working AI.**
+---
 
-You want to generate images on your AMD GPU. You don't want to spend the afternoon debugging PyTorch ROCm wheels, virtual environments, or why `libcuda.so.1` is missing on a card that doesn't even use CUDA.
+## 🎉 What's new — v2.0.0
 
-**One command. One click. ComfyUI running on your AMD GPU.**
+- 🔥 **ROCm 7.2.2** — latest production stable, AMD official repos, RDNA4 ready
+- 📁 **Custom install location** — pick where things live, with a clickable symlink to your models for easy file-manager access
+- 🪟 **WebApp pattern** — ComfyUI now opens in its own dedicated window (like Mint's WebApp Manager apps), zero pollution of your personal Firefox profile
+- 🎮 **Auto GPU split** — APU + dGPU setups (most modern Ryzens) are auto-configured to dedicate the dGPU to AI, freeing the iGPU for your desktop
+- 🗂️ **Manage your models from the file manager** — drag-and-drop `.safetensors` files into checkpoints/, vae/, lora/ folders directly from Thunar/Nautilus
+- 🚀 **Launcher renamed** — `comfyui.sh` → `comfyui-launcher.sh` for clarity
+- ⚙️ **Self-detecting launcher** — works with default OR custom install paths automatically
+- 🛡️ **Smart repair** — broken something? Re-launch the icon, the script detects what's missing and offers a fix
+- 🔧 **Hardened install** — verifies source files exist before copying, no silent failures
+
+> ⚠️ **Breaking change from v1.x:** the launcher script was renamed. Existing users will be silently migrated on next launch — no manual action needed.
 
 ---
 
 ## ✨ What you get
 
-- 🖥️ **Desktop shortcut** — click it, ComfyUI opens, you generate
-- 🎨 **ComfyUI** — node-based image generation, installed clean from the official repo
-- 📥 **Model downloader** — paste URL, pick folder from **22 options**, download. Filename stays original (templates rely on that)
-- ⚡ **Smart on-demand** — closes when you close the browser
-- 💾 **VRAM watchdog** — auto-frees memory after 5 minutes idle
-- 📂 **Standard layout** — `~/ComfyUI/` (git repo) and `~/.venvs/comfyui/` (venv). Easy to update with `git pull`
-- 🔒 **100% local** — your generations stay on your machine
+- 🖥️ **Desktop shortcut** — double-click. That's the whole workflow.
+- 🎨 **ComfyUI** — official repo, latest version, with full AMD ROCm acceleration
+- 🐍 **Isolated Python venv** — PyTorch ROCm 7.2 (latest), no system pollution
+- 🪟 **Dedicated app window** — separate from your personal Firefox, won't mess with your tabs
+- 🤖 **EZMoDL companion** — easy model downloader (Hugging Face + Civitai), bonus shortcut on your desktop
+- 🔒 **Fully offline** — your prompts and generations don't leave your GPU
+- ⚡ **On-demand** — services start when you click, stop when you close the browser
+- 💾 **VRAM watchdog** — frees GPU memory when you stop generating
+- 🔋 **Power efficient** — nothing runs at boot, no wasted wattage
 
 ---
 
@@ -35,19 +43,22 @@ You want to generate images on your AMD GPU. You don't want to spend the afterno
 
 | Component | Requirement |
 |---|---|
-| OS | Ubuntu 24.04 LTS |
-| GPU | AMD with ROCm support (RX 6000 series and newer) |
-| RAM | 16 GB minimum |
-| Storage | 25 GB free (PyTorch ROCm is chunky, I know) |
-| Internet | For the initial setup only |
+| **OS** | Ubuntu 24.04 LTS **or** Linux Mint 22.x (XFCE/Cinnamon) |
+| **GPU** | AMD with ROCm support (RX 6000 series and newer) |
+| **VRAM** | 8 GB minimum (12+ GB recommended for SDXL/Flux) |
+| **RAM** | 16 GB minimum |
+| **Storage** | 30 GB free (ROCm + ComfyUI + venv + models) |
+| **Internet** | For initial setup + model downloads |
 
-> ⚠️ **RDNA4 gang (RX 9070 / 9070 XT):** `HSA_OVERRIDE_GFX_VERSION=12.0.1` is already wired up. You're welcome.
+> ⚠️ **RDNA4 gang (RX 9070 / 9070 XT):** `HSA_OVERRIDE_GFX_VERSION=12.0.1` is wired up. You're welcome.
+
+> 💡 **APU + dGPU users (most Ryzen 7000+/8000+/9000+):** the launcher detects your dual-GPU setup and tells ComfyUI to use only the dedicated GPU. Frees the iGPU for your desktop, no session crash on heavy generations.
 
 ---
 
 ## 📦 Installation
 
-**Copy this 👇 — Paste into terminal — Go make dinner 🍝**
+**Copy 👇 — Paste — Grab a coffee ☕**
 
 ```bash
 git clone https://github.com/miradorventus/comfyui-amd-plug-and-play.git
@@ -56,17 +67,24 @@ chmod +x install_comfyui.sh
 ./install_comfyui.sh
 ```
 
-The installer does the work:
+The installer is **GUI all the way** — no scary terminal stuff:
 
-1. ✅ Asks for your password once (popup, not terminal)
-2. ✅ Detects what's missing (Python, Git, ROCm) and offers to install it
-3. ✅ Clones ComfyUI to `~/ComfyUI` (standard location — `git pull` works)
-4. ✅ Creates a separate venv in `~/.venvs/comfyui` (keeps things clean)
-5. ✅ Installs PyTorch with ROCm acceleration
-6. ✅ Creates **ComfyUI** and **DL Model** desktop shortcuts
+### Step 0 — Welcome
+Adaptive popup that scans your system and tells you exactly what's there, what's missing, and how big the download will be.
 
-> ⏳ Installation takes **10-20 minutes** — PyTorch ROCm is ~6 GB.
-> Live log window shows every step. Make a sandwich.
+### Step 0.5 — Install location *(new in v2.0.0)*
+Pick where to install:
+- ✅ **Default** — `~/.comfyui/` (hidden, standard Linux convention)
+- 📁 **Custom location** — pick your parent folder (e.g., `~/AI-Tools/`), the installer creates `<your-folder>/comfyui/` for scripts and `<your-folder>/comfy-models` as a clickable shortcut to `~/ComfyUI/models/`
+- ← **Back** — change your mind
+
+### Step 1 — Install
+Watching paint dry has never been more entertaining: rotating tips while ROCm + Python venv + ComfyUI + PyTorch all install. Sit back.
+
+If ROCm needs to be installed, you'll be asked to reboot at the end. Standard.
+
+### Step 2 — Done
+"Launch now?" — click and start generating images.
 
 ---
 
@@ -74,128 +92,118 @@ The installer does the work:
 
 **Start:** Double-click **ComfyUI** on your desktop
 
-**Stop:** Close the browser — ComfyUI shuts down automatically
+**Stop:** Close the browser window — services shut down, GPU freed
 
-**Download a model:** Double-click **DL Model** — it's GUI-first
+**Web interface:** `http://127.0.0.1:8188`
 
-**Web interface:** `http://localhost:8188`
+**Want a model?** Double-click **EZMoDL** (the green crystal icon) and paste a Hugging Face or Civitai URL. Done.
+
+**Already running?** Click the ComfyUI icon again — it tells you to look at the existing window.
+
+---
+
+## 📁 Manage Your Models from the File Manager
+
+If you chose a custom install location, you have a clickable `comfy-models` shortcut next to your `comfyui/` folder. Open it in Thunar / Nautilus / Caja, and you can:
+
+- 📥 **Drag-and-drop** `.safetensors` checkpoints into `checkpoints/`
+- 🎨 **Drop LoRAs** into `lora/`
+- 🖼️ **Drop VAEs** into `vae/`
+- 🎮 **Drop ControlNet** into `controlnet/`
+- 🗑️ **Delete** anything without sudo gymnastics
+- 📂 **Browse** what's actually on disk
+
+The shortcut is a symlink to `~/ComfyUI/models/`. The 22 standard model sub-folders are pre-created for you.
+
+---
+
+## 🤖 EZMoDL — The Easy Model Downloader
+
+ComfyUI on its own asks you to find URLs, manually drop them in the right folder. EZMoDL automates this:
+
+1. Double-click the **EZMoDL** icon
+2. Paste any **Hugging Face** or **Civitai** URL
+3. EZMoDL detects what kind of model it is (checkpoint, LoRA, VAE, etc.) and drops it in the right folder automatically
+
+```bash
+# Or run it from terminal if you prefer
+~/.comfyui/ezmodl.sh
+```
+
+---
+
+## 🛠️ Smart Repair
+
+Things break sometimes. Updates conflict. Files get deleted.
+
+If something's wrong with your install, **just relaunch the ComfyUI icon**. The launcher silently checks all components (repo, venv, scripts, models folder) and pops up a clear list of what's missing, with a **"Repair now"** button that runs the installer to fix only what's broken. Your generations and models stay safe.
 
 ---
 
 ## 🗑️ Uninstall
 
-**Copy this 👇 — Paste — Done.**
+**Copy 👇 — Paste — Done.**
 
 ```bash
 cd comfyui-amd-plug-and-play
 ./uninstall_comfyui.sh
 ```
 
-Asks if you want to **keep your models** (backed up to `~/comfyui_models_backup`).
-Because losing a 30 GB model collection would suck.
-
----
-
-## 📥 Download a Model
-
-### Option 1 — Desktop shortcut (the easy way)
-
-Double-click **DL Model** → paste URL → pick folder → download.
-No terminal, no rename prompts. Your templates will find the file exactly where they expect.
-
-**Supported folders** (yes, all 22 of them):
-
-checkpoints, loras, vae, controlnet, upscale_models, embeddings, text_encoders, clip, clip_vision, diffusion_models, diffusers, unet, audio_encoders, frame_interpolation, gligen, hypernetworks, latent_upscale_models, model_patches, photomaker, style_models, configs, vae_approx
-
-**Example URLs:**
-
-```
-# SDXL base
-https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
-
-# SD 1.5 classic
-https://huggingface.co/runwayml/stable-diffusion-v1-5/resolve/main/v1-5-pruned-emaonly.safetensors
-
-# Civitai — copy any model's direct download link
-```
-
-### Option 2 — Command line (the old way)
-
-```bash
-# SD 1.5 (2 GB, 512×512 images)
-wget -c "URL" -O ~/ComfyUI/models/checkpoints/v1-5-pruned-emaonly.safetensors
-
-# SDXL base (7 GB, 1024×1024 images)
-wget -c "URL" -O ~/ComfyUI/models/checkpoints/sd_xl_base_1.0.safetensors
-
-# A LoRA (50-200 MB, styles/characters)
-wget -c "URL" -O ~/ComfyUI/models/loras/my_lora.safetensors
-```
-
-### VRAM Guide
-
-| Your VRAM | Recommended setup |
-|---|---|
-| 4 GB | SD 1.5 @ 512×512 |
-| 8 GB | SDXL @ 1024×1024 |
-| 12 GB | Flux schnell (fast gens) |
-| 16 GB | Flux dev (quality gens) |
-| 24 GB+ | Flux dev + ControlNet + LoRAs, have fun |
-
-> 💡 Out of memory? Lower the resolution, use a smaller model, or unload other GPU apps. The watchdog helps too — it auto-frees memory after 5 min idle.
+- ✅ Removes ComfyUI repo, venv, launch scripts, desktop shortcuts
+- 💾 **Keeps your models** in `~/ComfyUI/models/` (delete manually if you want the space back)
+- 💾 **Keeps your output images** in `~/ComfyUI/output/`
 
 ---
 
 ## 🔧 Useful Commands
 
-**Update ComfyUI (one of the perks of standard layout):**
+**Check GPU usage during a generation:**
 ```bash
-cd ~/ComfyUI
-source ~/.venvs/comfyui/bin/activate
-git pull
-pip install -r requirements.txt
-deactivate
+watch -n 1 rocm-smi --showuse --showtemp --showmeminfo vram
 ```
 
-**Install a custom node (example: ComfyUI Manager):**
+**View ComfyUI log:**
 ```bash
-cd ~/ComfyUI/custom_nodes
-git clone https://github.com/ltdrdata/ComfyUI-Manager.git
-source ~/.venvs/comfyui/bin/activate
-cd ComfyUI-Manager && pip install -r requirements.txt
-deactivate
-# Restart ComfyUI to load it
+# Default location
+cat ~/.comfyui/comfyui.log
+
+# Or your custom location
+cat ~/AI-Tools/comfyui/comfyui.log
 ```
 
-**Check GPU is actually being used:**
+**Restart manually:**
 ```bash
-grep "ROCm\|AMD\|gfx" ~/comfyui.log
-# You want to see: pytorch version: X.X.X+rocm7.2
+~/.comfyui/stopcomfy.sh
+~/.comfyui/comfyui-launcher.sh
 ```
 
-**View logs when something breaks:**
+**Multi-GPU? Check which GPU is in use:**
 ```bash
-tail -30 ~/comfyui.log
+echo $HIP_VISIBLE_DEVICES
+# 0 = first dedicated GPU (correct for APU+dGPU setups)
 ```
-
-See **MEMO.txt** for the full command reference.
 
 ---
 
-## 🌐 Where to find models
+## 🙏 Sources Used (all official)
 
-- 🌐 **Civitai** — https://civitai.com (SD 1.5, SDXL, LoRA, everything)
-- 🤗 **HuggingFace** — https://huggingface.co (Flux, SDXL, raw models)
-- 📋 **OpenArt Workflows** — https://openart.ai/workflows (ready-made workflows)
+| Component | Source |
+|---|---|
+| ComfyUI | https://github.com/comfyanonymous/ComfyUI |
+| PyTorch ROCm | https://download.pytorch.org/whl/rocm7.2 |
+| ROCm 7.2.2 | https://repo.radeon.com (AMD official) |
+| Python | Ubuntu/Mint apt repos |
+
+No PPA. No fork. No mirror. Just trust + officialness.
 
 ---
 
 ## 💬 Contributing
 
-Bug? Feature idea? Tip for other users? **Pull requests and issues welcome.**
-This isn't a one-person gate-keeping project — it's for the AMD Linux community.
+Found a bug? Tested on a setup we don't list? Want a feature?
+**Issues and PRs welcome** — this is a community thing.
 
-Made by a fellow AMD Linux user who got tired of the setup dance. 🤝
+Made by a fellow AMD Linux user who got tired of "you need NVIDIA for AI" gatekeeping. For everyone else who got tired too. 🤝
 
 ---
 
