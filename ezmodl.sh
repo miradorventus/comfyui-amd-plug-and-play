@@ -1,6 +1,6 @@
 #!/bin/bash
 # ============================================================
-#  telecharger_modele.sh — Download ComfyUI models
+#  ezmodl.sh — EZMoDL: Download ComfyUI models
 #  All standard model folders supported
 # ============================================================
 
