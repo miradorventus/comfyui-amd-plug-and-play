@@ -4,7 +4,7 @@
 #  Version: 1.0.0
 # ============================================================
 
-VERSION="2.0.1"
+VERSION="2.0.2"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 RAW_URL="https://raw.githubusercontent.com/miradorventus/comfyui-amd-plug-and-play/main"
 
@@ -24,7 +24,7 @@ if [ -f "$COMFYUI_DIR/comfyui.sh" ] && [ ! -f "$COMFYUI_DIR/comfyui-launcher.sh"
 fi
 
 # Legacy migration: move old files from ~/ to COMFYUI_DIR
-for old_file in stopcomfy.sh watchdog_comfy.sh detect_browser.sh ezmodl.sh; do
+for old_file in stopcomfy.sh detect_browser.sh ezmodl.sh; do
   if [ -f "$HOME/$old_file" ] && [ ! -f "$COMFYUI_DIR/$old_file" ]; then
     mv "$HOME/$old_file" "$COMFYUI_DIR/$old_file" 2>/dev/null
   fi
@@ -36,8 +36,8 @@ if [ "$1" = "--update" ]; then
   REPO_DIR="$HOME/comfyui-amd-plug-and-play"
   if [ -d "$REPO_DIR/.git" ]; then
     cd "$REPO_DIR" && git pull && \
-      cp comfyui-launcher.sh stopcomfy.sh watchdog_comfy.sh ezmodl.sh detect_browser.sh "$COMFYUI_DIR/" 2>/dev/null
-    chmod +x "$COMFYUI_DIR/comfyui-launcher.sh" "$COMFYUI_DIR/stopcomfy.sh" "$COMFYUI_DIR/watchdog_comfy.sh" \
+      cp comfyui-launcher.sh stopcomfy.sh ezmodl.sh detect_browser.sh "$COMFYUI_DIR/" 2>/dev/null
+    chmod +x "$COMFYUI_DIR/comfyui-launcher.sh" "$COMFYUI_DIR/stopcomfy.sh" \
              "$COMFYUI_DIR/ezmodl.sh" "$COMFYUI_DIR/detect_browser.sh"
     echo "✅ Updated"
   else
@@ -117,7 +117,6 @@ INT_MISSING=""
 [ -f "$VENV_DIR/bin/python" ] || INT_MISSING+="\n  • Python in venv"
 [ -f "$COMFY_DIR/main.py" ] || INT_MISSING+="\n  • ComfyUI main.py"
 [ -f "$COMFYUI_DIR/stopcomfy.sh" ] || INT_MISSING+="\n  • stopcomfy.sh script"
-[ -f "$COMFYUI_DIR/watchdog_comfy.sh" ] || INT_MISSING+="\n  • watchdog_comfy.sh script"
 [ -f "$COMFYUI_DIR/detect_browser.sh" ] || INT_MISSING+="\n  • detect_browser.sh script"
 
 if [ -n "$INT_MISSING" ]; then
@@ -156,8 +155,8 @@ if [ -n "$LATEST" ] && [ "$LATEST" != "$VERSION" ]; then
         echo "20"; echo "# Pulling updates..."
         cd "$REPO_DIR" && git pull > /dev/null 2>&1
         echo "60"; echo "# Copying scripts..."
-        cp comfyui-launcher.sh stopcomfy.sh watchdog_comfy.sh ezmodl.sh detect_browser.sh "$COMFYUI_DIR/" 2>/dev/null
-        chmod +x "$COMFYUI_DIR/comfyui-launcher.sh" "$COMFYUI_DIR/stopcomfy.sh" "$COMFYUI_DIR/watchdog_comfy.sh" \
+        cp comfyui-launcher.sh stopcomfy.sh ezmodl.sh detect_browser.sh "$COMFYUI_DIR/" 2>/dev/null
+        chmod +x "$COMFYUI_DIR/comfyui-launcher.sh" "$COMFYUI_DIR/stopcomfy.sh" \
                  "$COMFYUI_DIR/ezmodl.sh" "$COMFYUI_DIR/detect_browser.sh"
         echo "100"
       ) | zenity --progress --title="ComfyUI — Updating" \
@@ -201,9 +200,6 @@ trap 'rm -f "$LOCK_FILE"; "$COMFYUI_DIR/stopcomfy.sh" 2>/dev/null' EXIT
     curl -s "$URL" > /dev/null 2>&1 && break
     sleep 1
   done
-
-  echo "# Starting VRAM watchdog..."
-  bash "$COMFYUI_DIR/watchdog_comfy.sh" > "$COMFYUI_DIR/watchdog.log" 2>&1 &
 
   echo "# Almost ready..."
   sleep 1
