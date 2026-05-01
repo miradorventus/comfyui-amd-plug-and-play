@@ -9,7 +9,7 @@
 #    ~/.comfyui/       (our scripts + log)
 # ============================================================
 
-VERSION="2.0.1"
+VERSION="2.0.2"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 DEFAULT_COMFYUI_DIR="$HOME/.comfyui"
 COMFYUI_DIR="$DEFAULT_COMFYUI_DIR"
@@ -29,7 +29,7 @@ done
 mkdir -p "$COMFYUI_DIR"
 
 # Legacy migration v1.1.x -> v1.0.0: move scripts from ~/ to ~/.comfyui/
-for old_file in comfyui.sh stopcomfy.sh watchdog_comfy.sh detect_browser.sh install_comfyui.log; do
+for old_file in comfyui.sh stopcomfy.sh detect_browser.sh install_comfyui.log; do
   if [ -f "$HOME/$old_file" ] && [ ! -f "$COMFYUI_DIR/$old_file" ]; then
     mv "$HOME/$old_file" "$COMFYUI_DIR/$old_file" 2>/dev/null
   fi
@@ -273,7 +273,7 @@ install_scripts() {
   log "=== Installing launch scripts ==="
   
   # Verify source files exist BEFORE copy
-  for SRC_FILE in comfyui-launcher.sh stopcomfy.sh watchdog_comfy.sh ezmodl.sh detect_browser.sh; do
+  for SRC_FILE in comfyui-launcher.sh stopcomfy.sh ezmodl.sh detect_browser.sh; do
     if [ ! -f "$SCRIPT_DIR/$SRC_FILE" ]; then
       log "ERROR: source file $SRC_FILE missing in $SCRIPT_DIR"
       zenity --error --title="Install package incomplete" \
@@ -287,7 +287,7 @@ install_scripts() {
     }
   done
   chmod +x "$COMFYUI_DIR/comfyui-launcher.sh" "$COMFYUI_DIR/stopcomfy.sh" \
-           "$COMFYUI_DIR/watchdog_comfy.sh" "$COMFYUI_DIR/ezmodl.sh" \
+           "$COMFYUI_DIR/ezmodl.sh" \
            "$COMFYUI_DIR/detect_browser.sh"
 
   # Symlink comfy-models in custom parent (if custom location)
