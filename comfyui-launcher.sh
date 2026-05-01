@@ -4,7 +4,7 @@
 #  Version: 1.0.0
 # ============================================================
 
-VERSION="2.0.3"
+VERSION="2.0.4"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 RAW_URL="https://raw.githubusercontent.com/miradorventus/comfyui-amd-plug-and-play/main"
 

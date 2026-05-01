@@ -2,12 +2,9 @@
 # ============================================================
 #  stopcomfy.sh — Stop ComfyUI
 # ============================================================
-
 echo "--- Stopping ComfyUI ---"
 pkill -f "python main.py" 2>/dev/null
-pkill -f "watchdog_comfy" 2>/dev/null
 echo "--- ComfyUI stopped ---"
-
-zenity --notification \
+zenity --info --title="ComfyUI" \
   --text="✅ ComfyUI stopped — GPU freed" \
-  --timeout=2 2>/dev/null &
+  --width=300 --timeout=2 2>/dev/null &
