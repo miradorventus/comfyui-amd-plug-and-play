@@ -9,7 +9,7 @@
 #    ~/.comfyui/       (our scripts + log)
 # ============================================================
 
-VERSION="2.0.2"
+VERSION="2.0.3"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 DEFAULT_COMFYUI_DIR="$HOME/.comfyui"
 COMFYUI_DIR="$DEFAULT_COMFYUI_DIR"
