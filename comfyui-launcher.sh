@@ -4,7 +4,7 @@
 #  Version: 1.0.0
 # ============================================================
 
-VERSION="2.0.2"
+VERSION="2.0.3"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 RAW_URL="https://raw.githubusercontent.com/miradorventus/comfyui-amd-plug-and-play/main"
 
@@ -182,6 +182,38 @@ echo $$ > "$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"; "$COMFYUI_DIR/stopcomfy.sh" 2>/dev/null' EXIT
 
 # ============================================================
+# STEP 4.5 — ASK USER FOR MODE (Fast vs High Compatibility)
+# ============================================================
+MODE_MSG="🎨 Choose your ComfyUI mode\n\n"
+MODE_MSG+="⚡ Fast mode\n"
+MODE_MSG+="    Best for: SDXL, SD 1.5, smaller models\n"
+MODE_MSG+="    Uses pinned memory for max speed\n"
+MODE_MSG+="    Recommended if your model fits in VRAM\n\n"
+MODE_MSG+="🐢 High Compatibility mode\n"
+MODE_MSG+="    Best for: Flux, WAN, large models\n"
+MODE_MSG+="    Disables pinned memory + reserves VRAM buffer\n"
+MODE_MSG+="    Slower but stable on heavy models"
+
+MODE_RES=$(zenity --question --title="ComfyUI — Launch mode" \
+  --text="$MODE_MSG" \
+  --ok-label="⚡ Fast" --cancel-label="❌ Cancel" \
+  --extra-button="🐢 High Compatibility" \
+  --width=500 2>/dev/null)
+MODE_CODE=$?
+
+EXTRA_FLAGS=""
+if [ "$MODE_RES" = "🐢 High Compatibility" ]; then
+  EXTRA_FLAGS="--reserve-vram 1.5 --disable-pinned-memory"
+elif [ $MODE_CODE -eq 0 ]; then
+  EXTRA_FLAGS=""
+else
+  # User cancelled
+  rm -f "$LOCK_FILE"
+  trap - EXIT
+  exit 0
+fi
+
+# ============================================================
 # STEP 5 — START COMFYUI
 # ============================================================
 (
@@ -191,7 +223,7 @@ trap 'rm -f "$LOCK_FILE"; "$COMFYUI_DIR/stopcomfy.sh" 2>/dev/null' EXIT
 
   echo "# Starting ComfyUI..."
   cd "$COMFY_DIR"
-  python main.py --listen 0.0.0.0 > "$COMFYUI_DIR/comfyui.log" 2>&1 &
+  python main.py --listen 0.0.0.0 $EXTRA_FLAGS > "$COMFYUI_DIR/comfyui.log" 2>&1 &
   COMFY_PID=$!
   echo $COMFY_PID > /tmp/comfyui.pid
 
