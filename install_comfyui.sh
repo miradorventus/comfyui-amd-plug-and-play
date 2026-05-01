@@ -9,11 +9,10 @@
 #    ~/.comfyui/       (our scripts + log)
 # ============================================================
 
-VERSION="2.0.3"
+VERSION="2.0.4"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 DEFAULT_COMFYUI_DIR="$HOME/.comfyui"
 COMFYUI_DIR="$DEFAULT_COMFYUI_DIR"
-CUSTOM_PARENT=""
 COMFY_DIR="$HOME/ComfyUI"
 VENV_DIR="$HOME/.venvs/comfyui"
 
@@ -290,14 +289,22 @@ install_scripts() {
            "$COMFYUI_DIR/ezmodl.sh" \
            "$COMFYUI_DIR/detect_browser.sh"
 
-  # Symlink comfy-models in custom parent (if custom location)
-  if [ -n "$CUSTOM_PARENT" ]; then
-    log "Setting up comfy-models symlink in $CUSTOM_PARENT..."
-    SYMLINK_PATH="$CUSTOM_PARENT/comfy-models"
-    REAL_TARGET="$COMFY_DIR/models"
-    
-    # Ensure the target exists (ComfyUI creates it during install)
-    [ ! -d "$REAL_TARGET" ] && mkdir -p "$REAL_TARGET"
+  # Ensure ComfyUI models target dir exists + create the 22 standard ComfyUI sub-folders
+  REAL_TARGET="$COMFY_DIR/models"
+  mkdir -p "$REAL_TARGET"
+  log "Ensuring 22 standard ComfyUI model sub-folders exist..."
+  for SUBDIR in animatediff_models animatediff_motion_lora animatediff_video_formats \
+                audio_encoders checkpoints classifiers clip clip_vision configs \
+                controlnet custom_nodes diffusers diffusion_models embeddings \
+                frame_interpolation hypernetworks loras photomaker style_models \
+                unet upscale_models vae vae_approx; do
+    mkdir -p "$REAL_TARGET/$SUBDIR"
+  done
+
+  # Symlink comfy-models in chosen location (if user didn't skip)
+  if [ -n "$SYMLINK_PARENT" ]; then
+    log "Setting up comfy-models symlink in $SYMLINK_PARENT..."
+    SYMLINK_PATH="$SYMLINK_PARENT/comfy-models"
     
     if [ -L "$SYMLINK_PATH" ]; then
       CURRENT_TARGET=$(readlink "$SYMLINK_PATH")
@@ -314,6 +321,8 @@ install_scripts() {
       ln -s "$REAL_TARGET" "$SYMLINK_PATH"
       log "✅ Symlink created: $SYMLINK_PATH → $REAL_TARGET"
     fi
+  else
+    log "Symlink creation skipped (user choice)"
   fi
 
   DESKTOP="$HOME/Desktop"
@@ -404,7 +413,14 @@ MSG_WELCOME+="🐍 Python venv with PyTorch ROCm (~5 GB)\n   pytorch.org officia
 MSG_WELCOME+="⏳ Total time: ~10-15 minutes\n\n"
 MSG_WELCOME+="All sources are official. No third-party mirrors.\n"
 
-# 3) WELCOME ↔ INSTALL LOCATION state machine (Back supported)
+# 3) WELCOME ↔ SYMLINK LOCATION state machine
+# Scripts are always installed in DEFAULT location (~/.comfyui/) for clarity.
+# User only chooses where the comfy-models shortcut goes.
+SYMLINK_PARENT=""  # where to put the comfy-models symlink (empty = no symlink)
+COMFYUI_DIR="$DEFAULT_COMFYUI_DIR"
+mkdir -p "$COMFYUI_DIR"
+LOG_FILE="$COMFYUI_DIR/install_comfyui.log"
+
 STATE="welcome"
 while true; do
   case "$STATE" in
@@ -414,51 +430,52 @@ while true; do
         --ok-label="✅ Continue" --cancel-label="❌ Cancel" \
         --width=550 2>/dev/null
       [ $? -ne 0 ] && exit 0
-      STATE="install_location"
+      STATE="symlink_location"
       ;;
     
-    install_location)
-      LOC_MSG="📁 Where to install ComfyUI scripts?\n\n"
-      LOC_MSG+="Default location:\n"
-      LOC_MSG+="  ~/.comfyui/   (hidden, standard Linux convention)\n\n"
-      LOC_MSG+="Or choose a custom parent folder where we'll create:\n"
-      LOC_MSG+="  <your-folder>/comfyui/   (scripts)\n"
-      LOC_MSG+="  <your-folder>/comfy-models   (symlink → ~/ComfyUI/models)\n\n"
-      LOC_MSG+="Note: the symlink is just a shortcut to the real model folder.\n"
-      LOC_MSG+="You can drag-and-drop .safetensors files, organize sub-folders\n"
-      LOC_MSG+="(checkpoints, vae, lora, controlnet) from your file manager."
+    symlink_location)
+      SYM_MSG="📂 Models shortcut for easy access\n\n"
+      SYM_MSG+="ComfyUI stores models in: ~/ComfyUI/models/\n"
+      SYM_MSG+="(22 sub-folders for checkpoints, LoRAs, VAEs, etc.)\n\n"
+      SYM_MSG+="To make managing models easier, we can create a clickable\n"
+      SYM_MSG+="shortcut in your file manager so you can drag-and-drop\n"
+      SYM_MSG+=".safetensors files into the right sub-folder.\n\n"
+      SYM_MSG+="Where do you want this shortcut?\n\n"
+      SYM_MSG+="✅ Default: shortcut in ~/comfy-models\n"
+      SYM_MSG+="📁 Custom: choose your own parent folder\n"
+      SYM_MSG+="    (e.g. ~/AI-Workspace/ → ~/AI-Workspace/comfy-models)\n"
+      SYM_MSG+="⏭️ Skip: no shortcut, manage models manually\n\n"
+      SYM_MSG+="Note: ComfyUI scripts will always be installed in ~/.comfyui/"
       
-      LOC_RES=$(zenity --question --title="Install location" --text="$LOC_MSG" \
+      SYM_RES=$(zenity --question --title="Models shortcut" --text="$SYM_MSG" \
         --ok-label="✅ Default" --cancel-label="← Back" \
         --extra-button="📁 Custom location" \
-        --width=580 2>/dev/null)
-      LOC_CODE=$?
+        --extra-button="⏭️ Skip" \
+        --width=600 2>/dev/null)
+      SYM_CODE=$?
       
-      if [ "$LOC_RES" = "📁 Custom location" ]; then
-        CUSTOM_PARENT=$(zenity --file-selection --directory \
-          --title="Choose parent folder for ComfyUI" \
+      if [ "$SYM_RES" = "📁 Custom location" ]; then
+        SYMLINK_PARENT=$(zenity --file-selection --directory \
+          --title="Choose parent folder for the comfy-models shortcut" \
           --filename="$HOME/" 2>/dev/null)
-        if [ -z "$CUSTOM_PARENT" ]; then
-          STATE="install_location"
+        if [ -z "$SYMLINK_PARENT" ]; then
+          STATE="symlink_location"
           continue
         fi
-        if [ ! -d "$CUSTOM_PARENT" ]; then
+        if [ ! -d "$SYMLINK_PARENT" ]; then
           zenity --warning --title="Invalid folder" \
-            --text="The selected folder doesn't exist:\n$CUSTOM_PARENT" \
+            --text="The selected folder doesn't exist:\n$SYMLINK_PARENT" \
             --width=400 2>/dev/null
-          STATE="install_location"
+          STATE="symlink_location"
           continue
         fi
-        COMFYUI_DIR="$CUSTOM_PARENT/comfyui"
-        mkdir -p "$COMFYUI_DIR"
-        # Update LOG_FILE path (was set with old COMFYUI_DIR)
-        LOG_FILE="$COMFYUI_DIR/install_comfyui.log"
         STATE="proceed"
-      elif [ $LOC_CODE -eq 0 ]; then
-        # Default
-        COMFYUI_DIR="$DEFAULT_COMFYUI_DIR"
-        mkdir -p "$COMFYUI_DIR"
-        LOG_FILE="$COMFYUI_DIR/install_comfyui.log"
+      elif [ "$SYM_RES" = "⏭️ Skip" ]; then
+        SYMLINK_PARENT=""  # explicit no symlink
+        STATE="proceed"
+      elif [ $SYM_CODE -eq 0 ]; then
+        # Default: ~/comfy-models
+        SYMLINK_PARENT="$HOME"
         STATE="proceed"
       else
         # Back
@@ -482,7 +499,8 @@ cat > "$LOG_FILE" << LOG_EOF
  Distro: $(lsb_release -d 2>/dev/null | cut -f2)
  Install dir: $COMFYUI_DIR
 LOG_EOF
-[ -n "$CUSTOM_PARENT" ] && echo " Custom parent: $CUSTOM_PARENT" >> "$LOG_FILE"
+[ -n "$SYMLINK_PARENT" ] && echo " Symlink parent: $SYMLINK_PARENT" >> "$LOG_FILE"
+[ -z "$SYMLINK_PARENT" ] && echo " Symlink: skipped" >> "$LOG_FILE"
 echo "============================================" >> "$LOG_FILE"
 
 # 4) Run install in background
