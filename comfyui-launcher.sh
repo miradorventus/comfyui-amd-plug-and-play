@@ -1,10 +1,10 @@
 #!/bin/bash
 # ============================================================
 #  comfyui-launcher.sh — Launcher ComfyUI (on-demand)
-#  Version: 1.0.0
+#  Version: 2.1.1
 # ============================================================
 
-VERSION="2.1.0"
+VERSION="2.1.1"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 RAW_URL="https://raw.githubusercontent.com/miradorventus/comfyui-amd-plug-and-play/main"
 
@@ -21,9 +21,9 @@ URL="http://127.0.0.1:8188"
 
 # ─── ROCm / RDNA 4 (gfx1201 - RX 9070 XT) memory tuning ─────
 export PYTORCH_HIP_ALLOC_CONF=garbage_collection_threshold:0.8,max_split_size_mb:512
-export HSA_OVERRIDE_GFX_VERSION=12.0.1
-export PYTORCH_ROCM_ARCH=gfx1201
-export HCC_AMDGPU_TARGET=gfx1201
+export HSA_OVERRIDE_GFX_VERSION="${HSA_OVERRIDE_GFX_VERSION:-12.0.1}"
+export PYTORCH_ROCM_ARCH="${PYTORCH_ROCM_ARCH:-gfx1201}"
+export HCC_AMDGPU_TARGET="${HCC_AMDGPU_TARGET:-gfx1201}"
 export TORCH_ROCM_AOTRITON_ENABLE_EXPERIMENTAL=1
 export MIOPEN_FIND_MODE=2
 export MIOPEN_LOG_LEVEL=3
