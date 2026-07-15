@@ -4,7 +4,7 @@
 #  Version: 1.0.0
 # ============================================================
 
-VERSION="2.0.5"
+VERSION="2.1.0"
 REPO_URL="https://github.com/miradorventus/comfyui-amd-plug-and-play"
 RAW_URL="https://raw.githubusercontent.com/miradorventus/comfyui-amd-plug-and-play/main"
 
@@ -15,6 +15,9 @@ COMFY_DIR="$HOME/ComfyUI"
 VENV_DIR="$HOME/.venvs/comfyui"
 LOCK_FILE="/tmp/comfyui.lock"
 URL="http://127.0.0.1:8188"
+
+# ─── Local overrides (survives auto-update) ─────────────────
+[ -f "$COMFYUI_DIR/launcher.conf" ] && source "$COMFYUI_DIR/launcher.conf"
 
 # ─── ROCm / RDNA 4 (gfx1201 - RX 9070 XT) memory tuning ─────
 export PYTORCH_HIP_ALLOC_CONF=garbage_collection_threshold:0.8,max_split_size_mb:512
@@ -135,7 +138,7 @@ watchdog_comfyui() {
     # Restart with same flags, append to existing log
     source "$VENV_DIR/bin/activate" 2>/dev/null
     cd "$COMFY_DIR"
-    python main.py --listen 127.0.0.1 $FLAGS >> "$COMFYUI_DIR/comfyui.log" 2>&1 &
+    python main.py --listen "${COMFYUI_LISTEN:-127.0.0.1}" $FLAGS >> "$COMFYUI_DIR/comfyui.log" 2>&1 &
     echo $! > /tmp/comfyui.pid
 
     # Wait for recovery (max 90s)
@@ -296,7 +299,7 @@ fi
 
   echo "# Starting ComfyUI..."
   cd "$COMFY_DIR"
-  python main.py --listen 127.0.0.1 $EXTRA_FLAGS > "$COMFYUI_DIR/comfyui.log" 2>&1 &
+  python main.py --listen "${COMFYUI_LISTEN:-127.0.0.1}" $EXTRA_FLAGS > "$COMFYUI_DIR/comfyui.log" 2>&1 &
   COMFY_PID=$!
   echo $COMFY_PID > /tmp/comfyui.pid
 
