@@ -1,4 +1,7 @@
 #!/bin/bash
+# shellcheck disable=SC2024
+# SC2024: redirections vers "$LOG_FILE" volontairement executees en tant
+# qu'utilisateur, pas en root — le log doit rester lisible/ecrivable par lui.
 # ============================================================
 #  install_comfyui.sh
 #  ComfyUI installer — AMD ROCm — Ubuntu 24.04 / Linux Mint 22+
@@ -117,7 +120,8 @@ trap 'rm -f "$TIPS_FILE" "$STATUS_FILE"' EXIT
 # Detect current install phase from log content
 detect_current_step() {
   local log_file="$1"
-  local last_lines=$(tail -n 50 "$log_file" 2>/dev/null)
+  local last_lines
+  last_lines=$(tail -n 50 "$log_file" 2>/dev/null)
 
   if echo "$last_lines" | grep -q "Cloning into 'ComfyUI'"; then
     echo "📦 Cloning ComfyUI repository (~3 GB)..."
