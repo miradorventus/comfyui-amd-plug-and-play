@@ -135,7 +135,7 @@ watchdog_comfyui() {
     # Restart with same flags, append to existing log
     source "$VENV_DIR/bin/activate" 2>/dev/null
     cd "$COMFY_DIR"
-    python main.py --listen 0.0.0.0 $FLAGS >> "$COMFYUI_DIR/comfyui.log" 2>&1 &
+    python main.py --listen 127.0.0.1 $FLAGS >> "$COMFYUI_DIR/comfyui.log" 2>&1 &
     echo $! > /tmp/comfyui.pid
 
     # Wait for recovery (max 90s)
@@ -296,7 +296,7 @@ fi
 
   echo "# Starting ComfyUI..."
   cd "$COMFY_DIR"
-  python main.py --listen 0.0.0.0 $EXTRA_FLAGS > "$COMFYUI_DIR/comfyui.log" 2>&1 &
+  python main.py --listen 127.0.0.1 $EXTRA_FLAGS > "$COMFYUI_DIR/comfyui.log" 2>&1 &
   COMFY_PID=$!
   echo $COMFY_PID > /tmp/comfyui.pid
 
